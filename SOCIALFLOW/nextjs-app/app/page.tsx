@@ -26,6 +26,12 @@ export default function SocialNetwork() {
   const [hashtags, setHashtags] = useState<string[]>([])
   const [hashtagsCopied, setHashtagsCopied] = useState(false)
 
+  // Brand Voice Tuner states
+  const [voiceText, setVoiceText] = useState('')
+  const [brandVoice, setBrandVoice] = useState('Friendly, playful, and upbeat. Uses casual language.')
+  const [rewrittenText, setRewrittenText] = useState('')
+  const [voiceCopied, setVoiceCopied] = useState(false)
+
   const generateCaption = async () => {
     if (!imageDescription.trim()) return
     
@@ -104,6 +110,25 @@ export default function SocialNetwork() {
     }
   }
 
+  const tuneBrandVoice = async () => {
+    if (!voiceText.trim() || !brandVoice.trim()) return
+    setLoading(true)
+    try {
+      const response = await fetch('/api/brand-voice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: voiceText, voice: brandVoice })
+      })
+      const data = await response.json()
+      if (data.rewritten) {
+        setRewrittenText(data.rewritten)
+      }
+    } catch (error) {
+      console.error('Error tuning brand voice:', error)
+    }
+    setLoading(false)
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-400 via-purple-500 to-indigo-600">
       <div className="container mx-auto px-4 py-8">
@@ -119,7 +144,8 @@ export default function SocialNetwork() {
             {[
               { id: 'caption', label: '📸 Caption', desc: 'Generate Captions', gradient: 'instagram-gradient' },
               { id: 'mood', label: '😊 Mood', desc: 'Check Sentiment', gradient: 'twitter-gradient' },
-              { id: 'hashtags', label: '#️⃣ Hashtags', desc: 'Suggest Tags', gradient: 'social-gradient' }
+              { id: 'hashtags', label: '#️⃣ Hashtags', desc: 'Suggest Tags', gradient: 'social-gradient' },
+              { id: 'voice', label: '🗣️ Brand Voice', desc: 'Rewrite to tone', gradient: 'instagram-gradient' }
             ].map(tab => (
               <button
                 key={tab.id}
